@@ -68,7 +68,7 @@ const courseSchema = new mongoose.Schema({
         {
           title: String,
           duration: String,
-          videoId: String, // YouTube video ID
+          videoId: String, 
           description: String,
         },
       ],

@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
 
 const app = express();
 
@@ -14,7 +13,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const MONGODB_URI =
-  process.env.MONGODB_URI ||
   "mongodb+srv://shiwangi349_db_user:Shiw7870%40%23@cluster0.5pebc06.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 mongoose
   .connect(MONGODB_URI, {
@@ -26,9 +24,11 @@ mongoose
 
 app.use("/api/courses", require("./routes/courses"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/quizzes", require("./routes/quizzes"));
 
 const User = require("./models/User");
 const Course = require("./models/Course");
+const Quiz = require("./models/Quiz");
 
 app.get("/admin", async (req, res) => {
   try {
@@ -79,15 +79,45 @@ app.get("/admin/courses", async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "client/build")));
+app.get("/admin/quizzes", async (req, res) => {
+  try {
+    const quizzes = await Quiz.find().sort({ createdAt: -1 });
+    const courses = await Course.find().select("_id title").sort({ title: 1 });
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/build", "index.html"));
-  });
-}
+    res.render("quizzes", {
+      title: "Quiz Management - Edemy Admin",
+      quizzes: quizzes,
+      courses: courses,
+    });
+  } catch (error) {
+    console.error("Quizzes page error:", error);
+    res.status(500).send("Server Error");
+  }
+});
 
-const PORT = process.env.PORT || 5002;
+app.get("/admin/courses/:courseId/quizzes", async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.courseId);
+    if (!course) {
+      return res.status(404).send("Course not found");
+    }
+
+    const quizzes = await Quiz.find({ courseId: req.params.courseId }).sort({
+      createdAt: -1,
+    });
+
+    res.render("course-quizzes", {
+      title: `${course.title} - Quiz Management - Edemy Admin`,
+      course: course,
+      quizzes: quizzes,
+    });
+  } catch (error) {
+    console.error("Course quizzes page error:", error);
+    res.status(500).send("Server Error");
+  }
+});
+
+const PORT = 5002;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+import QuizTaking from "./pages/QuizTaking";
+import QuizResults from "./pages/QuizResults";
 import Footer from "./components/Footer";
 import RegisterModal from "./components/RegisterModal";
 import SignInModal from "./components/SignInModal";
@@ -42,6 +44,22 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <CourseDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quiz/:id"
+              element={
+                <ProtectedRoute>
+                  <QuizTaking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quiz/:id/results"
+              element={
+                <ProtectedRoute>
+                  <QuizResults />
                 </ProtectedRoute>
               }
             />
